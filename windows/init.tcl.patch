@@ -1,0 +1,54 @@
+--- orig/lib/tcl8.4/init.tcl	2006-12-14 18:30:07.000000000 +0100
++++ new/lib/tcl8.4/init.tcl	2008-04-02 16:02:22.000000000 +0200
+@@ -41,7 +41,7 @@
+ 
+ if {![info exists auto_path]} {
+     if {[info exists env(TCLLIBPATH)]} {
+-	set auto_path $env(TCLLIBPATH)
++	set auto_path [list $env(TCLLIBPATH)]
+     } else {
+ 	set auto_path ""
+     }
+@@ -781,42 +781,3 @@
+ }
+ 
+ package provide {ActiveTcl} {8.4.14.0.272572}
+-
+-
+-
+-# -*- tcl -*-
+-# Nov 26, 2006
+-# Copyright (C) 2006 ActiveState Software Inc.
+-
+-# TEAPOT LINKAGE BEGIN
+-# Standard code for setting up the default local TEAPOT repository in
+-# use by this installation.
+-
+-if {![interp issafe] && ![catch {package require platform}]} {
+-    # Toplevel directory of the standard local per-user repository
+-
+-    global __teapot
+-    set    __teapot {C:/Dokumente und Einstellungen/develop/Teapot/repository}
+-
+-    # Make all repository subdirectories available which can contain
+-    # packages for the architecture currently executing this Tcl
+-    # script. This code assumes a directory structure as created by
+-    # 'repository::localma'.
+-
+-    foreach __ [platform::patterns [platform::identify]] {
+-	set __ [file join $__teapot package $__]
+-
+-	# The tm subdirectory contains Tcl Modules. This is relevant
+-	# only to a tcl shell which is able to handle such.
+-
+-	# The lib subdirectory on the other hand contains regular
+-	# packages and can be used by all Tcl shells.
+-
+-	lappend ::auto_path           [file join $__ lib]
+-	catch {::tcl::tm::roots [list [file join $__ teapot]]}
+-    }
+-    unset __teapot __
+-    catch {package require __teapot__}
+-}
+-# TEAPOT LINKAGE END
+-
