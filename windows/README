@@ -1,4 +1,0 @@
-Fix init.tcl:
-
-cd 8.4.14/
-patch -p1 < ../init.tcl.patch
