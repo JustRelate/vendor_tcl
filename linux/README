@@ -1,0 +1,34 @@
+mkdir src
+cd src
+unzip ~/Downloads/tcl864-src.zip
+
+# On Linux
+cd External/tcl/linux/src/tcl8.6.4/unix
+
+base=`cd ../../.. && pwd -P`/8.6.4
+mkdir -p "$base"
+
+LDFLAGS="-L/usr/lib/i386-linux-gnu" \
+  ./configure \
+  --prefix "$base" \
+  --with-tzdata=yes \
+  --disable-64bit \
+  --enable-man-symlinks \
+  --enable-shared
+
+make && make install
+
+cd "$base"
+ln -s tclsh8.6 bin/tclsh
+ln -s libtcl8.6.so lib/libtcl.so
+
+tar cjf ../8.6.4.tbz2 .
+
+# On Commit Host (MacOS)
+
+cd External/tcl/linux/8.6.4
+rm -rf share man # bin
+( cd lib && rm -rf itcl4.0.3 tcl8 tcl8.6 tdbc1.0.3 tdbcodbc1.0.3 thread2.7.2 sqlite3.8.8.3 tdbcmysql1.0.3 tdbcpostgres1.0.3 )
+
+cd ..
+rm -rf src
