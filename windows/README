@@ -1,4 +1,40 @@
-Fix init.tcl:
+Downloaded tcl: tcl864-src.zip
+Downloaded Visual C++ 2010 Express: https://www.visualstudio.com/downloads/download-visual-studio-vs#DownloadFamilies_4
+ => vc_web.exe
+Install VC in local VirtualBox Windows 2012(?)
 
-cd 8.4.14/
-patch -p1 < ../init.tcl.patch
+Extracted Tcl into C:\Users\Administrator\Documents\tcl8.6.4
+
+Open VC Terminal Console
+cd C:\Users\Administrator\Documents\tcl8.6.4\win
+nmake /f makefile.vc
+nmake /f makefile.vc install
+
+Copy C:\Program Files\Tcl to External/tcl/windows/8.6.4/tcl
+
+Patch 8.6.4/tcl/lib/tcl8.6/init.tcl to allow space in TCLLIBPATH:
+
+ if {![info exists auto_path]} {
+     if {[info exists env(TCLLIBPATH)]} {
+-        set auto_path $env(TCLLIBPATH)
++        set auto_path [list $env(TCLLIBPATH)]
+     } else {
+         set auto_path ""
+     }
+ }
+
+# Create 3rdparty package (use tar from packaging (Linux) host and not MacOS)
+cd External/tcl/windows
+tar cjf 8.6.4.tbz2 tcl
+
+# Provide devel files
+cp -r 8.6.4/raw/include 8.6.4/
+cp -r 8.6.4/raw/bin 8.6.4/lib
+
+# Provide an un-versioned shared tcl to compiler/linker
+ln -s tcl86t.lib 8.6.4/lib/tcl.lib
+
+# Change (windows) Tcl version in tasks/build/10_externals.rake
+
+# try
+rake TARGET_OSTYPE=windows build
