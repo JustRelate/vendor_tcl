@@ -1,4 +1,31 @@
 Fix init.tcl:
 
-cd 8.4.14/
-patch -p1 < ../init.tcl.patch
+- allow spaces in auto_path # => set auto_path [list $env(TCLLIBPATH)]
+- remove activestate's teapot stuff (if present)
+
+Provide -ltcl (for whatever reason we renamed this ...)
+cp bin/tcl85.dll bin/tcl.dll
+
+# package the whole thing
+mkdir tcl
+rsync -av --delete 8.5.9/ tcl
+tar cjf 8.5.9.tbz2 tcl
+
+# Adjust -devel for linker path
+(
+  cd 8.5.9 &&
+  mv bin/* lib &&
+  rmdir bin
+)
+
+# Cleanup non-devel files
+(
+  cd 8.5.9/lib &&
+  rm -rf Tclxml3.2 TclxmlConfig.sh dde1.3/ reg1.2/ tcl8 tcllib1.13 tls1.6 tcl8.5 &&
+  rm tcl85.dll
+)
+
+rm -rf \
+  8.5.9/bin \
+  8.5.9/man \
+  8.5.9/share
