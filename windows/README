@@ -1,19 +1,6 @@
-Downloaded tcl: tcl864-src.zip
-Downloaded Visual C++ 2010 Express: https://www.visualstudio.com/downloads/download-visual-studio-vs#DownloadFamilies_4
- => vc_web.exe
-Install VC in local VirtualBox Windows 2012(?)
+Patch 8.?.?/tcl/lib/tcl?.?/init.tcl
 
-Extracted Tcl into C:\Users\Administrator\Documents\tcl8.6.4
-
-Open VC Terminal Console
-cd C:\Users\Administrator\Documents\tcl8.6.4\win
-nmake /f makefile.vc
-nmake /f makefile.vc install
-
-Copy C:\Program Files\Tcl to External/tcl/windows/8.6.4/tcl
-
-Patch 8.6.4/tcl/lib/tcl8.6/init.tcl to allow space in TCLLIBPATH:
-
+# to allow space in TCLLIBPATH:
  if {![info exists auto_path]} {
      if {[info exists env(TCLLIBPATH)]} {
 -        set auto_path $env(TCLLIBPATH)
@@ -22,6 +9,56 @@ Patch 8.6.4/tcl/lib/tcl8.6/init.tcl to allow space in TCLLIBPATH:
          set auto_path ""
      }
  }
+
+# Remove any activestate's teapot stuff (if present)
+
+/Patch
+
+Provide -ltcl (for whatever reason we renamed this ...)
+cp bin/tcl8?.dll bin/tcl.dll
+
+# package the whole thing
+mkdir tcl
+rsync -av --delete 8.5.9/ tcl
+tar cjf 8.5.9.tbz2 tcl
+
+# Adjust -devel for linker path
+(
+  cd 8.5.9 &&
+  mv bin/* lib &&
+  rmdir bin
+)
+
+# Cleanup non-devel files
+(
+  cd 8.5.9/lib &&
+  rm -rf Tclxml3.2 TclxmlConfig.sh dde1.3/ reg1.2/ tcl8 tcllib1.13 tls1.6 tcl8.5 &&
+  rm tcl85.dll
+)
+
+rm -rf \
+  8.5.9/bin \
+  8.5.9/man \
+  8.5.9/share
+
+
+### Failed attempt for 8.6.4
+
+Introduces msvcr100.dll - which most probably conflicts with msvcr71.dll
+
+Downloaded tcl: tcl864-src.zip
+Downloaded Visual C++ 2010 Express: https://www.visualstudio.com/downloads/download-visual-studio-vs#DownloadFamilies_4
+ => vc_web.exe
+Install VC in local VirtualBox Windows 2012
+
+Extract Tcl into C:\Users\Administrator\Documents\tcl8.6.4
+
+Open VC Terminal Console
+cd C:\Users\Administrator\Documents\tcl8.6.4\win
+nmake /f makefile.vc
+nmake /f makefile.vc install
+
+Copy C:\Program Files\Tcl to External/tcl/windows/8.6.4/tcl
 
 # Create 3rdparty package (use tar from packaging (Linux) host and not MacOS)
 cd External/tcl/windows
@@ -35,6 +72,8 @@ cp -r 8.6.4/raw/bin 8.6.4/lib
 ln -s tcl86t.lib 8.6.4/lib/tcl.lib
 
 # Change (windows) Tcl version in tasks/build/10_externals.rake
+# Change Tcl versions in a lot of wrapper files
+# (see fiona's 1df6a0190f9a2b67104b0257ba7b88d29c9ee023)
 
 # try
 rake TARGET_OSTYPE=windows build
